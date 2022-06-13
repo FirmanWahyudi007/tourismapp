@@ -1,4 +1,4 @@
-node_modules/
+/node_modules
 .env
-public/images/destinations/*.jpg
-public/images/products/*.jpg
+/public/images/destinations/*.jpg
+/public/images/products/*.jpg
