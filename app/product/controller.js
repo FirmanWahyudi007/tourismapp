@@ -62,9 +62,9 @@ module.exports = {
         });
         req.flash("alertMessage", "Berhasil tambah produk");
         req.flash("alertStatus", "success");
-        res.redirect("/produk");
+        res.redirect("/product");
       } else {
-        res.redirect("/produk/create");
+        res.redirect("/product/create");
       }
     } catch (err) {
       req.flash("alertMessage", `${err.message}`);
@@ -92,6 +92,14 @@ module.exports = {
       res.redirect("/product");
     } catch (err) {
       req.flash("alertMessage", `${err.message}`);
+      console.log(err);
+    }
+  },
+  apiGetAll: async (req, res) => {
+    try {
+      const product = await Product.find();
+      res.json(product);
+    } catch (err) {
       console.log(err);
     }
   },
