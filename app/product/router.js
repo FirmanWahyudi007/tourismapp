@@ -13,5 +13,8 @@ const {
 } = require("./controller");
 
 router.get("/", index);
+router.get("/create", viewCreate);
+router.post("/create", multipartMiddleware, actionCreate); // multipartMiddleware is for upload file
+router.delete("/delete/:id", actionDelete);
 
 module.exports = router;

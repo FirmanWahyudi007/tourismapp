@@ -10,6 +10,7 @@ const flash = require("connect-flash");
 var dashboardRouter = require("./app/category/router");
 var categoryRouter = require("./app/category/router");
 var destinationRoute = require("./app/destination/router");
+var productRoute = require("./app/product/router");
 
 var app = express();
 
@@ -40,7 +41,7 @@ app.use(
 app.use("/", dashboardRouter);
 app.use("/category", categoryRouter);
 app.use("/destination", destinationRoute);
-
+app.use("/product", productRoute);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
