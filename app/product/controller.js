@@ -11,6 +11,7 @@ module.exports = {
       const alert = { message: alertMessage, status: alertStatus };
       res.render("admin/product/view_product", {
         title: "| Produk",
+        name: req.session.user.nama,
         products,
         alert,
       });
@@ -23,6 +24,7 @@ module.exports = {
     try {
       res.render("admin/product/create", {
         title: "| Tambah Produk",
+        name: req.session.user.nama,
       });
     } catch (error) {
       console.log(error);
@@ -76,6 +78,7 @@ module.exports = {
       const product = await Product.findById(id);
       res.render("admin/product/edit", {
         title: "| Edit Produk",
+        name: req.session.user.nama,
         product,
       });
     } catch (error) {

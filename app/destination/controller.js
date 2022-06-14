@@ -11,12 +11,13 @@ module.exports = {
     try {
       const alertMessage = req.flash("alertMessage");
       const alertStatus = req.flash("alertStatus");
-
+      console.log(req.session.user);
       const alert = { message: alertMessage, status: alertStatus };
       const destination = await Destination.find().populate("category");
       res.render("admin/destination/view_destination", {
         destination,
         alert,
+        name: req.session.user.nama,
         title: "| Destinasi Wisata",
       });
     } catch (err) {
@@ -31,6 +32,7 @@ module.exports = {
       res.render("admin/destination/create", {
         category,
         title: "| Tambah Destination",
+        name: req.session.user.nama,
       });
     } catch (err) {
       req.flash("alertMessage", `${err.message}`);
@@ -93,6 +95,7 @@ module.exports = {
         destination,
         category,
         title: "| Edit Destination",
+        name: req.session.user.nama,
       });
     } catch (err) {
       req.flash("alertMessage", `${err.message}`);
