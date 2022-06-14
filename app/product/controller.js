@@ -127,57 +127,6 @@ module.exports = {
       console.log(err);
     }
   },
-  apiGetAll: async (req, res) => {
-    try {
-      let { name, minPrice, maxPrice } = req.query;
-      if (name) {
-        const product = await Product.find({
-          name: { $regex: ".*" + name + ".*" },
-        });
-        if (product.length > 0) {
-          res.json({
-            status: "success",
-            data: product,
-          });
-        } else {
-          res.json({
-            status: "failed",
-            message: "Data tidak ditemukan",
-          });
-        }
-      } else if (minPrice && maxPrice) {
-        const product = await Product.find({
-          price: { $gte: minPrice, $lte: maxPrice },
-        });
-        if (product.length > 0) {
-          res.json({
-            status: "success",
-            data: product,
-          });
-        } else {
-          res.json({
-            status: "failed",
-            message: "Data tidak ditemukan",
-          });
-        }
-      } else {
-        const product = await Product.find();
-        if (product.length > 0) {
-          res.json({
-            status: "success",
-            data: product,
-          });
-        } else {
-          res.json({
-            status: "failed",
-            message: "Data tidak ditemukan",
-          });
-        }
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  },
 };
 
 function strRP(price) {

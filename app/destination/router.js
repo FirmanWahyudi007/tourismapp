@@ -9,16 +9,15 @@ const {
   viewEdit,
   actionEdit,
   actionDelete,
-  apiGetAll,
 } = require("./controller");
 const { isLoginAdmin } = require("../middleware/auth");
 
-router.get("/", isLoginAdmin, index);
-router.get("/create", isLoginAdmin, viewCreate);
-router.post("/create", isLoginAdmin, multipartMiddleware, actionCreate);
-router.get("/edit/:id", isLoginAdmin, viewEdit);
-router.put("/edit/:id", isLoginAdmin, actionEdit);
-router.delete("/delete/:id", isLoginAdmin, actionDelete);
-router.get("/api/", apiGetAll);
+router.use(isLoginAdmin);
+router.get("/", index);
+router.get("/create", viewCreate);
+router.post("/create", multipartMiddleware, actionCreate);
+router.get("/edit/:id", viewEdit);
+router.put("/edit/:id", actionEdit);
+router.delete("/delete/:id", actionDelete);
 
 module.exports = router;
