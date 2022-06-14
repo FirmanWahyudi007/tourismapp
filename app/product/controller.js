@@ -35,7 +35,6 @@ module.exports = {
       if (req.files) {
         var files = [];
         var fileKeys = Object.keys(req.files.galleries);
-        // console.log(req.files.galleries[1].path);
         fileKeys.forEach(function (key) {
           files.push(req.files.galleries[key].name);
           let tmp_path = req.files.galleries[key].path;
@@ -71,6 +70,36 @@ module.exports = {
       console.log(err);
     }
   },
+  viewEdit: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const product = await Product.findById(id);
+      res.render("admin/product/edit", {
+        title: "| Edit Produk",
+        product,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  actionEdit: async (req, res) => {
+    try {
+      const { id } = req.params;
+      let { name, description, price } = req.body;
+      console.log(req.body);
+      price = strRP(price);
+      await Product.findByIdAndUpdate(id, {
+        name,
+        description,
+        price,
+      });
+      req.flash("alertMessage", "Berhasil edit produk");
+      req.flash("alertStatus", "success");
+      res.redirect("/product");
+    } catch (error) {
+      console.log(error);
+    }
+  },
   actionDelete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -97,8 +126,51 @@ module.exports = {
   },
   apiGetAll: async (req, res) => {
     try {
-      const product = await Product.find();
-      res.json(product);
+      let { name, minPrice, maxPrice } = req.query;
+      if (name) {
+        const product = await Product.find({
+          name: { $regex: ".*" + name + ".*" },
+        });
+        if (product.length > 0) {
+          res.json({
+            status: "success",
+            data: product,
+          });
+        } else {
+          res.json({
+            status: "failed",
+            message: "Data tidak ditemukan",
+          });
+        }
+      } else if (minPrice && maxPrice) {
+        const product = await Product.find({
+          price: { $gte: minPrice, $lte: maxPrice },
+        });
+        if (product.length > 0) {
+          res.json({
+            status: "success",
+            data: product,
+          });
+        } else {
+          res.json({
+            status: "failed",
+            message: "Data tidak ditemukan",
+          });
+        }
+      } else {
+        const product = await Product.find();
+        if (product.length > 0) {
+          res.json({
+            status: "success",
+            data: product,
+          });
+        } else {
+          res.json({
+            status: "failed",
+            message: "Data tidak ditemukan",
+          });
+        }
+      }
     } catch (err) {
       console.log(err);
     }

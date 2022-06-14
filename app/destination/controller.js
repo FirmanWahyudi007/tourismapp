@@ -4,6 +4,7 @@ const Category = require("../category/models");
 const path = require("path");
 const fs = require("fs");
 const config = require("../../config");
+const { name } = require("ejs");
 
 module.exports = {
   index: async (req, res) => {
@@ -83,6 +84,43 @@ module.exports = {
       console.log(err);
     }
   },
+  viewEdit: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const destination = await Destination.findById(id);
+      const category = await Category.find();
+      res.render("admin/destination/edit", {
+        destination,
+        category,
+        title: "| Edit Destination",
+      });
+    } catch (err) {
+      req.flash("alertMessage", `${err.message}`);
+      console.log(err);
+    }
+  },
+  actionEdit: async (req, res) => {
+    try {
+      const { id } = req.params;
+      let { name, description, address, price, category, google_map } =
+        req.body;
+      price = strRP(price);
+      await Destination.findByIdAndUpdate(id, {
+        name,
+        description,
+        address,
+        price,
+        category,
+        google_map,
+      });
+      req.flash("alertMessage", "Berhasil edit destinasi");
+      req.flash("alertStatus", "success");
+      res.redirect("/destination");
+    } catch (err) {
+      req.flash("alertMessage", `${err.message}`);
+      console.log(err);
+    }
+  },
   actionDelete: async (req, res) => {
     try {
       const { id } = req.params;
@@ -115,8 +153,68 @@ module.exports = {
   },
   apiGetAll: async (req, res) => {
     try {
-      const destination = await Destination.find().populate("category");
-      res.json(destination);
+      let { category, name, minPrice, maxPrice } = req.query;
+      console.log(req.query);
+      // const category = await Category.find();
+      if (category) {
+        const destination = await Destination.find().populate({
+          path: "category",
+          select: "name",
+          match: { name: category },
+        });
+        var data = [];
+        for (let i = 0; i < destination.length; i++) {
+          if (destination[i].category != null) {
+            data.push({
+              destination: destination[i],
+            });
+          }
+        }
+        if (data.length > 0) {
+          res.json({
+            status: "success",
+            data,
+          });
+        } else {
+          res.json({
+            status: "failed",
+            message: "Data tidak ditemukan",
+          });
+        }
+      } else if (name) {
+        const destination = await Destination.find({
+          name: { $regex: ".*" + name + ".*" },
+        }).populate("category");
+        if (destination.length > 0) {
+          res.json({
+            status: "success",
+            data: destination,
+          });
+        } else {
+          res.json({
+            status: "failed",
+            message: "Data tidak ditemukan",
+          });
+        }
+      } else if (minPrice && maxPrice) {
+        const destination = await Destination.find({
+          price: { $gte: minPrice, $lte: maxPrice },
+        }).populate("category");
+        if (destination.length > 0) {
+          res.json({
+            status: "success",
+            data: destination,
+          });
+        } else {
+          res.json({
+            status: "failed",
+            message: "Data tidak ditemukan",
+          });
+        }
+      } else {
+        const destination = await Destination.find().populate("category");
+        res.json(destination);
+      }
     } catch (err) {
       console.log(err);
     }
