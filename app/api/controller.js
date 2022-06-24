@@ -72,7 +72,7 @@ module.exports = {
   },
   apiProduct: async (req, res) => {
     try {
-      let { name, minPrice, maxPrice } = req.query;
+      let { name, minPrice, maxPrice, category } = req.query;
       if (name) {
         const product = await Product.find({
           name: { $regex: ".*" + name + ".*" },
@@ -81,6 +81,32 @@ module.exports = {
           res.json({
             status: "success",
             data: product,
+          });
+        } else {
+          res.json({
+            status: "failed",
+            message: "Data tidak ditemukan",
+          });
+        }
+      } else if (category) {
+        const product = await Product.find().populate({
+          path: "category",
+          select: "name",
+          match: { name: category },
+        });
+        console.log(product);
+        var data = [];
+        for (let i = 0; i < product.length; i++) {
+          if (product[i].category != null) {
+            data.push({
+              product: product[i],
+            });
+          }
+        }
+        if (data.length > 0) {
+          res.json({
+            status: "success",
+            data,
           });
         } else {
           res.json({
