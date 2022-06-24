@@ -25,10 +25,8 @@ jobs:
         env:
           HOST: ${{ secrets.HOST }}
           USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
           PORT: 22
           KEY: ${{ secrets.SSH_KEY }}
-          FINGERPRINT: ${{ secrets.PUBLIC_KEY }}
         with:
           source: "*"
           target: "/tourismapp"
@@ -39,8 +37,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          fingerprint: ${{ secrets.PUBLIC_KEY }}
-          password: ${{ secrets.PASSWORD }}
           port: 22
           script: |
             sudo chmod -R 755 /tourismapp
