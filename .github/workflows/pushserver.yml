@@ -17,7 +17,7 @@ jobs:
           port: 22
           script: |
             sudo chmod -R 755 /tourismapp
-            sudo chown -R username:username /tourismapp
+            sudo chown -R ligabayu:ligabayu /tourismapp
             sudo setfacl -R -m u:www-data:rwx /tourismapp 
 
       - uses: actions/checkout@v2
