@@ -14,6 +14,7 @@ var destinationRoute = require("./app/destination/router");
 var productRoute = require("./app/product/router");
 var userRoute = require("./app/users/router");
 var apiRoute = require("./app/api/router");
+var categoryProductRoute = require("./app/categoryProduct/router");
 
 var app = express();
 const URL = `/api/v1`;
@@ -46,6 +47,7 @@ app.use("/", userRoute);
 app.use("/dashboard", dashboardRouter);
 app.use("/category", categoryRouter);
 app.use("/destination", destinationRoute);
+app.use("/categoryproduct", categoryProductRoute);
 app.use("/product", productRoute);
 
 //api

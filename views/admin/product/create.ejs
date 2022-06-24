@@ -48,6 +48,15 @@
                                         placeholder="Masukkan harga produk" />
                                 </div>
                                 <div class="form-group">
+                                    <label for="category">Kategori</label>
+                                    <select class="form-control" id="category" name="category">
+                                        <option value="">Pilih Kategori</option>
+                                        <% for (var i = 0; i < category.length; i++) { %>
+                                        <option value="<%= category[i].id %>"><%= category[i].name %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                                <div class="form-group">
                                     <label for="image">Gambar</label>
                                     <input type="file" class="form-control" id="galleries" name="galleries"
                                         placeholder="Masukkan gambar produk" multiple

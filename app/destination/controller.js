@@ -28,7 +28,6 @@ module.exports = {
   viewCreate: async (req, res) => {
     try {
       const category = await Category.find();
-      let randomNumber = Math.floor(Math.random() * (1000000 - 1 + 1)) + 1;
       res.render("admin/destination/create", {
         category,
         title: "| Tambah Destination",

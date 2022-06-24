@@ -1,0 +1,26 @@
+version: '3.3'
+services:
+  #mongodb services
+  mongo_db:
+    image: mongo:latest
+    container_name: mongo_db
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_db:/data/db
+  
+  #tourismapp services
+  tourismapp:
+    build: .
+    ports:
+      - 4000:3000
+    environment:
+      - MODE=DEV
+      - SERVICE_NAME=tourismapp
+      - MONGO_URL=mongodb://mongo_db:27017/tourismapp
+    depends_on:
+      - mongo_db
+
+volumes:
+  mongo_db: {}

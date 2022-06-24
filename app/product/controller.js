@@ -1,11 +1,12 @@
 const Product = require("./models");
+const Category = require("../categoryProduct/models");
 const path = require("path");
 const fs = require("fs");
 const config = require("../../config");
 module.exports = {
   index: async (req, res) => {
     try {
-      const products = await Product.find();
+      const products = await Product.find().populate("category");
       const alertMessage = req.flash("alertMessage");
       const alertStatus = req.flash("alertStatus");
       const alert = { message: alertMessage, status: alertStatus };
@@ -22,7 +23,9 @@ module.exports = {
   },
   viewCreate: async (req, res) => {
     try {
+      const category = await Category.find();
       res.render("admin/product/create", {
+        category,
         title: "| Tambah Produk",
         name: req.session.user.nama,
       });
@@ -32,7 +35,7 @@ module.exports = {
   },
   actionCreate: async (req, res) => {
     try {
-      let { name, description, price } = req.body;
+      let { name, description, price, category } = req.body;
       price = strRP(price);
       if (req.files) {
         var files = [];
@@ -59,6 +62,7 @@ module.exports = {
           name,
           description,
           price,
+          category,
           galleries: files,
         });
         req.flash("alertMessage", "Berhasil tambah produk");
@@ -76,7 +80,9 @@ module.exports = {
     try {
       const { id } = req.params;
       const product = await Product.findById(id);
+      const category = await Category.find();
       res.render("admin/product/edit", {
+        category,
         title: "| Edit Produk",
         name: req.session.user.nama,
         product,
@@ -88,13 +94,14 @@ module.exports = {
   actionEdit: async (req, res) => {
     try {
       const { id } = req.params;
-      let { name, description, price } = req.body;
+      let { name, description, price, category } = req.body;
       console.log(req.body);
       price = strRP(price);
       await Product.findByIdAndUpdate(id, {
         name,
         description,
         price,
+        category,
       });
       req.flash("alertMessage", "Berhasil edit produk");
       req.flash("alertStatus", "success");
