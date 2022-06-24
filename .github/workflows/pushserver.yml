@@ -18,7 +18,6 @@ jobs:
           script: |
             sudo chmod -R 755 tourismapp
             sudo chown -R ligabayu:ligabayu tourismapp
-            sudo setfacl -R -m u:www-data:rwx tourismapp 
 
       - uses: actions/checkout@v2
       - name: Deploy source-code
@@ -44,4 +43,3 @@ jobs:
           script: |
             sudo chmod -R 755 tourismapp
             sudo chown -R www-data:www-data tourismapp
-            sudo setfacl -R -m u:ligabayu:rwx tourismapp
