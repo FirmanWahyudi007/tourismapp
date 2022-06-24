@@ -15,9 +15,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            sudo chmod -R 755 /project
-            sudo chown -R username:username /project
-            sudo setfacl -R -m u:www-data:rwx /project 
+            sudo chmod -R 755 /tourismapp
+            sudo chown -R username:username /tourismapp
+            sudo setfacl -R -m u:www-data:rwx /tourismapp 
 
       - uses: actions/checkout@v2
       - name: Deploy source-code
@@ -29,7 +29,7 @@ jobs:
           KEY: ${{ secrets.SSH_KEY }}
         with:
           source: "*"
-          target: "/project"
+          target: "/tourismapp"
 
       - name: Reset Permissions after deployment
         uses: appleboy/ssh-action@master
@@ -39,6 +39,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            sudo chmod -R 755 /project
-            sudo chown -R www-data:www-data /project
-            sudo setfacl -R -m u:username:rwx /project
+            sudo chmod -R 755 /tourismapp
+            sudo chown -R www-data:www-data /tourismapp
+            sudo setfacl -R -m u:username:rwx /tourismapp
