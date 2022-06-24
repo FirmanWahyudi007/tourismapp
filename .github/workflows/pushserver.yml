@@ -16,9 +16,9 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: 22
           script: |
-            sudo chmod -R 777 /tourismapp
-            sudo chown -R ligabayu:ligabayu /tourismapp
-            sudo setfacl -R -m u:www-data:rwx /tourismapp 
+            sudo chmod -R 755 tourismapp
+            sudo chown -R ligabayu:ligabayu tourismapp
+            sudo setfacl -R -m u:www-data:rwx tourismapp 
 
       - uses: actions/checkout@v2
       - name: Deploy source-code
@@ -31,7 +31,7 @@ jobs:
           PORT: 22
         with:
           source: "*"
-          target: "/tourismapp"
+          target: "tourismapp"
 
       - name: Reset Permissions after deployment
         uses: appleboy/ssh-action@master
@@ -42,6 +42,6 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           port: 22
           script: |
-            sudo chmod -R 777 /tourismapp
-            sudo chown -R www-data:www-data /tourismapp
-            sudo setfacl -R -m u:username:rwx /tourismapp
+            sudo chmod -R 755 tourismapp
+            sudo chown -R www-data:www-data tourismapp
+            sudo setfacl -R -m u:username:rwx tourismapp
