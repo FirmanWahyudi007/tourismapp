@@ -31,7 +31,7 @@
                         <!-- /.card-header -->
                         <!-- form start -->
                         <form action="/destination/edit/<%= destination._id  %>?_method=PUT" method="POST"
-                            autocomplete="off">
+                            autocomplete="off" enctype="multipart/form-data">
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="name">Destination</label>
@@ -49,8 +49,14 @@
                                         placeholder="Masukkan deskripsi destination"><%= destination.description  %></textarea>
                                 </div>
                                 <div class="form-group">
+                                    <label for="galleries">Gambar</label>
+                                    <input type="file" class="form-control" id="image" name="image"
+                                        placeholder="Masukkan gambar destination" multiple accept="image/jpg,
+                                        image/jpeg, image/png" />
+                                </div>
+                                <div class="form-group">
                                     <label for="price">Harga</label>
-                                    <input type="text" class="form-control" id="price" name="price"
+                                    <input type="text" class="form-control" id="harga" name="price"
                                         placeholder="Masukkan harga destination" value="<%= destination.price  %>" />
                                 </div>
                                 <div class="form-group">

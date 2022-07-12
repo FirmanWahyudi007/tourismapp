@@ -30,7 +30,8 @@
                         </div>
                         <!-- /.card-header -->
                         <!-- form start -->
-                        <form action="/product/edit/<%= product._id  %>?_method=PUT" method="POST" autocomplete="off">
+                        <form action="/product/edit/<%= product._id  %>?_method=PUT" method="POST" autocomplete="off"
+                            enctype="multipart/form-data">
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="name">Produk</label>
@@ -53,11 +54,16 @@
                                         <option value="">Pilih Kategori</option>
                                         <% for (var i = 0; i < category.length; i++) { %>
                                         <option value="<%= category[i].id %>"
-                                            <% if(category[i].id ==  destination.category) { %> selected
-                                            <% }else{ ''}  %>>
+                                            <% if(category[i].id ==  product.category) { %> selected <% }else{ ''}  %>>
                                             <%= category[i].name %></option>
                                         <% } %>
                                     </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="image">Gambar</label>
+                                    <input type="file" class="form-control" id="image" name="image"
+                                        placeholder="Masukkan gambar produk"
+                                        accept="image/jpg, image/jpeg, image/png" />
                                 </div>
                                 <!-- /.card-body -->
                                 <div class="card-footer">

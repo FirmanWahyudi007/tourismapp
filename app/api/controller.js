@@ -3,7 +3,7 @@ const Product = require("../product/models");
 module.exports = {
   apiDestination: async (req, res) => {
     try {
-      let { category, name, minPrice, maxPrice } = req.query;
+      let { category, name } = req.query;
       // const category = await Category.find();
       if (category) {
         const destination = await Destination.find().populate({
@@ -45,21 +45,6 @@ module.exports = {
             message: "Data tidak ditemukan",
           });
         }
-      } else if (minPrice && maxPrice) {
-        const destination = await Destination.find({
-          price: { $gte: minPrice, $lte: maxPrice },
-        }).populate("category");
-        if (destination.length > 0) {
-          res.json({
-            status: "success",
-            data: destination,
-          });
-        } else {
-          res.json({
-            status: "failed",
-            message: "Data tidak ditemukan",
-          });
-        }
       } else {
         const destination = await Destination.find().populate("category");
         res.json({
@@ -72,7 +57,7 @@ module.exports = {
   },
   apiProduct: async (req, res) => {
     try {
-      let { name, minPrice, maxPrice, category } = req.query;
+      let { name, category } = req.query;
       if (name) {
         const product = await Product.find({
           name: { $regex: ".*" + name + ".*" },
@@ -114,23 +99,8 @@ module.exports = {
             message: "Data tidak ditemukan",
           });
         }
-      } else if (minPrice && maxPrice) {
-        const product = await Product.find({
-          price: { $gte: minPrice, $lte: maxPrice },
-        });
-        if (product.length > 0) {
-          res.json({
-            status: "success",
-            data: product,
-          });
-        } else {
-          res.json({
-            status: "failed",
-            message: "Data tidak ditemukan",
-          });
-        }
       } else {
-        const product = await Product.find();
+        const product = await Product.find().populate("category");
         res.json({
           data: product,
         });

@@ -15,7 +15,7 @@
             <td><%= i + 1 %></td>
             <td><%= products[i].name %></td>
             <td><%= products[i].description %></td>
-            <td><%= products[i].price.toLocaleString('is', { style: 'currency', currency: 'IDR' }) %></td>
+            <td><%= products[i].price %></td>
             <td><%= products[i].category?.name ?? '-' %> %></td>
             <td>
                 <form action="/product/delete/<%= products[i]._id %>?_method=DELETE" method="POST">

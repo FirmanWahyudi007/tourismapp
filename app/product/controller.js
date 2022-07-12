@@ -35,41 +35,49 @@ module.exports = {
   },
   actionCreate: async (req, res) => {
     try {
-      let { name, description, price, category } = req.body;
-      price = strRP(price);
-      if (req.files) {
-        var files = [];
-        var fileKeys = Object.keys(req.files.galleries);
-        fileKeys.forEach(function (key) {
-          files.push(req.files.galleries[key].name);
-          let tmp_path = req.files.galleries[key].path;
-          let fileName = req.files.galleries[key].name;
-          let target_path = path.resolve(
-            config.rootPath,
-            `public/images/products/${fileName}`
-          );
-          const src = fs.createReadStream(tmp_path);
-          const dest = fs.createWriteStream(target_path);
-
-          src.pipe(dest);
-          src.on("end", async () => {
-            fs.unlink(tmp_path, (err) => {
-              if (err) throw err;
+      let { name, description, low_price, high_price, category } = req.body;
+      low_price = convertToRupiah(low_price);
+      high_price = convertToRupiah(high_price);
+      let price = `${low_price} - ${high_price}`;
+      if (req.file) {
+        let tmp_path = req.file.path;
+        let originalExt =
+          req.file.originalname.split(".")[
+            req.file.originalname.split(".").length - 1
+          ];
+        let fileName = req.file.filename + "." + originalExt;
+        let target_path = path.resolve(
+          config.rootPath,
+          `public/images/products/${fileName}`
+        );
+        const src = fs.createReadStream(tmp_path);
+        const dest = fs.createWriteStream(target_path);
+        src.pipe(dest);
+        src.on("end", async () => {
+          try {
+            fs.unlinkSync(tmp_path);
+            const product = new Product({
+              name,
+              description,
+              price,
+              galleries: fileName,
+              category,
             });
-          });
+            await product.save();
+            req.flash("alertMessage", `${name} berhasil ditambahkan`);
+            req.flash("alertStatus", "success");
+            res.redirect("/product");
+          } catch (error) {
+            req.flash("alertMessage", `${err.message}`);
+            req.flash("alertStatus", "danger");
+
+            res.redirect("/destination");
+          }
         });
-        await Product.create({
-          name,
-          description,
-          price,
-          category,
-          galleries: files,
-        });
-        req.flash("alertMessage", "Berhasil tambah produk");
-        req.flash("alertStatus", "success");
-        res.redirect("/product");
       } else {
-        res.redirect("/product/create");
+        req.flash("alertMessage", `Tambah produk gagal`);
+        req.flash("alertStatus", "danger");
+        res.redirect("/product");
       }
     } catch (err) {
       req.flash("alertMessage", `${err.message}`);
@@ -95,17 +103,54 @@ module.exports = {
     try {
       const { id } = req.params;
       let { name, description, price, category } = req.body;
-      console.log(req.body);
-      price = strRP(price);
-      await Product.findByIdAndUpdate(id, {
-        name,
-        description,
-        price,
-        category,
-      });
-      req.flash("alertMessage", "Berhasil edit produk");
-      req.flash("alertStatus", "success");
-      res.redirect("/product");
+      if (req.file) {
+        let tmp_path = req.file.path;
+        let originalExt =
+          req.file.originalname.split(".")[
+            req.file.originalname.split(".").length - 1
+          ];
+        let fileName = req.file.filename + "." + originalExt;
+        let target_path = path.resolve(
+          config.rootPath,
+          `public/images/products/${fileName}`
+        );
+        const src = fs.createReadStream(tmp_path);
+        const dest = fs.createWriteStream(target_path);
+        src.pipe(dest);
+        src.on("end", async () => {
+          try {
+            fs.unlinkSync(tmp_path);
+            const product = await Product.findById(id);
+            let currentImg = `${config.rootPath}/public/images/products/${product.galleries}`;
+            if (fs.existsSync(currentImg)) {
+              fs.unlinkSync(currentImg);
+            }
+            product.name = name;
+            product.description = description;
+            product.price = price;
+            product.galleries = fileName;
+            product.category = category;
+            await product.save();
+            req.flash("alertMessage", `${name} berhasil diubah`);
+            req.flash("alertStatus", "success");
+            res.redirect("/product");
+          } catch (error) {
+            req.flash("alertMessage", `${err.message}`);
+            req.flash("alertStatus", "danger");
+            res.redirect("/product");
+          }
+        });
+      } else {
+        const product = await Product.findById(id);
+        product.name = name;
+        product.description = description;
+        product.price = price;
+        product.category = category;
+        await product.save();
+        req.flash("alertMessage", `${name} berhasil diubah`);
+        req.flash("alertStatus", "success");
+        res.redirect("/product");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -114,19 +159,12 @@ module.exports = {
     try {
       const { id } = req.params;
       const product = await Product.findById(id);
-      if (product.galleries) {
-        product.galleries.forEach(async (file) => {
-          const filePath = path.resolve(
-            config.rootPath,
-            `public/images/products/${file}`
-          );
-          fs.unlink(filePath, (err) => {
-            if (err) throw err;
-          });
-        });
+      let currentImg = `${config.rootPath}/public/images/products/${product.galleries}`;
+      if (fs.existsSync(currentImg)) {
+        fs.unlinkSync(currentImg);
       }
-      await Product.findByIdAndDelete(id);
-      req.flash("alertMessage", "Berhasil hapus produk");
+      await Product.findByIdAndRemove({ _id: id });
+      req.flash("alertMessage", "Berhasil hapus product");
       req.flash("alertStatus", "success");
       res.redirect("/product");
     } catch (err) {
@@ -136,9 +174,21 @@ module.exports = {
   },
 };
 
-function strRP(price) {
-  var baru = price.replace("Rp. ", "");
-  var replacePoint = baru.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, "");
-  var newPrice = Number(replacePoint);
-  return newPrice;
+function convertToRupiah(number) {
+  if (number) {
+    var rupiah = "";
+    var numberrev = number.toString().split("").reverse().join("");
+    for (var i = 0; i < numberrev.length; i++)
+      if (i % 3 == 0) rupiah += numberrev.substr(i, 3) + ".";
+
+    return (
+      "Rp. " +
+      rupiah
+        .split("", rupiah.length - 1)
+        .reverse()
+        .join("")
+    );
+  } else {
+    return number;
+  }
 }

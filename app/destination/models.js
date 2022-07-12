@@ -15,8 +15,8 @@ let destinationSchema = mongoose.Schema(
       type: String,
     },
     price: {
-      type: Number,
-      default: 0,
+      require: [true, "Harga destinasi harus diisi"],
+      type: String,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -26,11 +26,10 @@ let destinationSchema = mongoose.Schema(
       type: String,
       default: "",
     },
-    galleries: [
-      {
-        type: String,
-      },
-    ],
+    galleries: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

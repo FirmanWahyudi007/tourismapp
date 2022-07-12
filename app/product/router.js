@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
-var multipart = require("connect-multiparty");
-var multipartMiddleware = multipart();
+const multer = require("multer");
+const os = require("os");
 const {
   index,
   viewCreate,
@@ -15,9 +15,17 @@ const { isLoginAdmin } = require("../middleware/auth");
 router.use(isLoginAdmin);
 router.get("/", index);
 router.get("/create", viewCreate);
-router.post("/create", multipartMiddleware, actionCreate); // multipartMiddleware is for upload file
+router.post(
+  "/create",
+  multer({ dest: os.tmpdir() }).single("image"),
+  actionCreate
+); // multipartMiddleware is for upload file
 router.get("/edit/:id", viewEdit);
-router.put("/edit/:id", actionEdit);
+router.put(
+  "/edit/:id",
+  multer({ dest: os.tmpdir() }).single("image"),
+  actionEdit
+);
 router.delete("/delete/:id", actionDelete);
 
 module.exports = router;

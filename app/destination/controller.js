@@ -40,44 +40,60 @@ module.exports = {
   },
   actionCreate: async (req, res) => {
     try {
-      let { name, description, address, price, category, google_map } =
-        req.body;
-      price = strRP(price);
-      if (req.files) {
-        var files = [];
-        var fileKeys = Object.keys(req.files.galleries);
-        // console.log(req.files.galleries[1].path);
-        fileKeys.forEach(function (key) {
-          files.push(req.files.galleries[key].name);
-          let tmp_path = req.files.galleries[key].path;
-          let fileName = req.files.galleries[key].name;
-          let target_path = path.resolve(
-            config.rootPath,
-            `public/images/destinations/${fileName}`
-          );
-          const src = fs.createReadStream(tmp_path);
-          const dest = fs.createWriteStream(target_path);
+      let {
+        name,
+        description,
+        address,
+        low_price,
+        high_price,
+        category,
+        google_map,
+      } = req.body;
+      console.log(req.body);
+      low_price = convertToRupiah(low_price);
+      high_price = convertToRupiah(high_price);
+      let price = `${low_price} - ${high_price}`;
+      if (req.file) {
+        let tmp_path = req.file.path;
+        let originalExt =
+          req.file.originalname.split(".")[
+            req.file.originalname.split(".").length - 1
+          ];
+        let fileName = req.file.filename + "." + originalExt;
+        let target_path = path.resolve(
+          config.rootPath,
+          `public/images/destinations/${fileName}`
+        );
+        const src = fs.createReadStream(tmp_path);
+        const dest = fs.createWriteStream(target_path);
+        src.pipe(dest);
 
-          src.pipe(dest);
-          src.on("end", async () => {
-            fs.unlink(tmp_path, (err) => {
-              if (err) throw err;
+        src.on("end", async () => {
+          try {
+            await fs.unlinkSync(tmp_path);
+            const destination = new Destination({
+              name,
+              description,
+              address,
+              price,
+              category,
+              google_map,
+              galleries: fileName,
             });
-          });
+            await destination.save();
+            req.flash("alertStatus", "success");
+            req.flash("alertMessage", `Berhasil menambahkan destination`);
+            res.redirect(`/destination`);
+          } catch (err) {
+            req.flash("alertMessage", `${err.message}`);
+            req.flash("alertStatus", "danger");
+
+            res.redirect("/destination");
+          }
         });
-        await Destination.create({
-          name,
-          description,
-          address,
-          price,
-          category,
-          google_map,
-          galleries: files,
-        });
-        req.flash("alertMessage", "Berhasil tambah destinasi");
-        req.flash("alertStatus", "success");
-        res.redirect("/destination");
       } else {
+        req.flash("alertMessage", "Gambar tidak boleh kosong");
+        req.flash("alertStatus", "danger");
         res.redirect("/destination/create");
       }
     } catch (err) {
@@ -106,18 +122,61 @@ module.exports = {
       const { id } = req.params;
       let { name, description, address, price, category, google_map } =
         req.body;
-      price = strRP(price);
-      await Destination.findByIdAndUpdate(id, {
-        name,
-        description,
-        address,
-        price,
-        category,
-        google_map,
-      });
-      req.flash("alertMessage", "Berhasil edit destinasi");
-      req.flash("alertStatus", "success");
-      res.redirect("/destination");
+      console.log(req.file);
+      if (req.file) {
+        let tmp_path = req.file.path;
+        let originalExt =
+          req.file.originalname.split(".")[
+            req.file.originalname.split(".").length - 1
+          ];
+        let fileName = req.file.filename + "." + originalExt;
+        let target_path = path.resolve(
+          config.rootPath,
+          `public/images/destinations/${fileName}`
+        );
+        const src = fs.createReadStream(tmp_path);
+        const dest = fs.createWriteStream(target_path);
+        src.pipe(dest);
+
+        src.on("end", async () => {
+          try {
+            await fs.unlinkSync(tmp_path);
+            const destination = await Destination.findById(id);
+            let currentImg = `${config.rootPath}/public/images/destinations/${destination.galleries}`;
+            if (fs.existsSync(currentImg)) {
+              fs.unlinkSync(currentImg);
+            }
+            destination.name = name;
+            destination.description = description;
+            destination.address = address;
+            destination.price = price;
+            destination.category = category;
+            destination.google_map = google_map;
+            destination.galleries = fileName;
+            await destination.save();
+            req.flash("alertStatus", "success");
+            req.flash("alertMessage", `Berhasil mengubah destination`);
+            res.redirect(`/destination`);
+          } catch (err) {
+            req.flash("alertMessage", `${err.message}`);
+            req.flash("alertStatus", "danger");
+
+            res.redirect("/destination");
+          }
+        });
+      } else {
+        const destination = await Destination.findById(id);
+        destination.name = name;
+        destination.description = description;
+        destination.address = address;
+        destination.price = price;
+        destination.category = category;
+        destination.google_map = google_map;
+        await destination.save();
+        req.flash("alertStatus", "success");
+        req.flash("alertMessage", `Berhasil mengubah destination`);
+        res.redirect(`/destination`);
+      }
     } catch (err) {
       req.flash("alertMessage", `${err.message}`);
       console.log(err);
@@ -127,37 +186,36 @@ module.exports = {
     try {
       const { id } = req.params;
       const destination = await Destination.findById(id);
-      if (destination) {
-        destination.galleries.forEach(async (image) => {
-          fs.unlink(
-            path.resolve(
-              config.rootPath,
-              `public/images/destinations/${image}`
-            ),
-            (err) => {
-              if (err) throw err;
-            }
-          );
-        });
-        await Destination.findByIdAndDelete(id);
-        req.flash("alertMessage", "Berhasil hapus destinasi");
-        req.flash("alertStatus", "success");
-        res.redirect("/destination");
-      } else {
-        req.flash("alertMessage", "Destinasi tidak ditemukan");
-        req.flash("alertStatus", "danger");
-        res.redirect("/destination");
+      let currentImg = `${config.rootPath}/public/images/destinations/${destination.galleries}`;
+      if (fs.existsSync(currentImg)) {
+        fs.unlinkSync(currentImg);
       }
+      await Destination.findByIdAndRemove({ _id: id });
+      req.flash("alertMessage", "Berhasil hapus destinasi");
+      req.flash("alertStatus", "success");
+      res.redirect("/destination");
     } catch (err) {
       req.flash("alertMessage", `${err.message}`);
       console.log(err);
+      res.redirect("/destination");
     }
   },
 };
+function convertToRupiah(number) {
+  if (number) {
+    var rupiah = "";
+    var numberrev = number.toString().split("").reverse().join("");
+    for (var i = 0; i < numberrev.length; i++)
+      if (i % 3 == 0) rupiah += numberrev.substr(i, 3) + ".";
 
-function strRP(price) {
-  var baru = price.replace("Rp. ", "");
-  var replacePoint = baru.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, "");
-  var newPrice = Number(replacePoint);
-  return newPrice;
+    return (
+      "Rp. " +
+      rupiah
+        .split("", rupiah.length - 1)
+        .reverse()
+        .join("")
+    );
+  } else {
+    return number;
+  }
 }
