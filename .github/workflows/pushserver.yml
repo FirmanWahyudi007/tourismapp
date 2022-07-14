@@ -45,3 +45,4 @@ jobs:
             sudo chmod -R 755 tourismapp
             sudo chown -R www-data:www-data tourismapp
             sudo setfacl -R -m u:bintangpoetra:rwx tourismapp
+            
