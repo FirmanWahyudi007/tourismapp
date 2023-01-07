@@ -35,7 +35,7 @@ services:
     ports:
       - 80:80
     depends_on:
-      - webapp
+      - tourismapp
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
