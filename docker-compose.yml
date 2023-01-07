@@ -12,15 +12,37 @@ services:
   
   #tourismapp services
   tourismapp:
+    restart: unless-stopped
     build: .
-    ports:
-      - 4000:3000
+##    Uncomment this if you want to expose app too.
+##    ports:
+##    - 3000:${WEBAPP_PORT}
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - node_network
     environment:
       - MODE=DEV
       - SERVICE_NAME=tourismapp
       - MONGO_URL=mongodb://mongo_db:27017/tourismapp
     depends_on:
       - mongo_db
+  
+  proxy:
+    restart: unless-stopped
+    image: nginx
+    ports:
+      - 80:${NGINX_PORT}
+    depends_on:
+      - webapp
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - node_network
 
 volumes:
   mongo_db: {}
+
+networks:
+  node_network:
