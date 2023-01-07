@@ -15,8 +15,8 @@ services:
     restart: unless-stopped
     build: .
 ##    Uncomment this if you want to expose app too.
-##    ports:
-##    - 3000:${WEBAPP_PORT}
+    ports:
+    - 3000:3000
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
     image: nginx
     ports:
-      - 80:${NGINX_PORT}
+      - 80:80
     depends_on:
       - webapp
     volumes:

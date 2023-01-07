@@ -1,6 +1,11 @@
-FROM node:alpine
+FROM node:14-alpine
+
 WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-CMD [ "npm", "start" ]
+
+COPY package*.json /usr/src/app
+
+RUN npm install
+
+COPY . /usr/src/app
+
+CMD npm start
